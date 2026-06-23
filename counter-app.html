@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카운터 앱</title>
+    <!-- Tailwind CSS CDN 가져오기 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <!-- 카운터 앱 컨테이너 -->
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <!-- 제목 -->
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
+            🎯 카운터 앱
+        </h1>
+
+        <!-- 카운트 숫자 표시 영역 -->
+        <div class="bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl p-8 mb-8 text-center">
+            <p class="text-white text-sm font-semibold mb-2">현재 카운트</p>
+            <!-- 큰 숫자로 현재 카운트 표시 -->
+            <p id="counter" class="text-7xl font-bold text-white">
+                0
+            </p>
+        </div>
+
+        <!-- 버튼 그룹 -->
+        <div class="flex gap-4 mb-6">
+            <!-- 감소 버튼 (-1) -->
+            <button
+                onclick="decreaseCounter()"
+                class="flex-1 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-4 rounded-lg transition duration-200 transform hover:scale-105 active:scale-95 text-xl"
+            >
+                ➖ 감소
+            </button>
+
+            <!-- 증가 버튼 (+1) -->
+            <button
+                onclick="increaseCounter()"
+                class="flex-1 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-4 rounded-lg transition duration-200 transform hover:scale-105 active:scale-95 text-xl"
+            >
+                ➕ 증가
+            </button>
+        </div>
+
+        <!-- 리셋 버튼 -->
+        <button
+            onclick="resetCounter()"
+            class="w-full bg-pink-500 hover:bg-pink-600 active:bg-pink-700 text-white font-bold py-3 rounded-lg transition duration-200 transform hover:scale-105 active:scale-95 text-lg"
+        >
+            🔄 리셋
+        </button>
+
+        <!-- 현재 상태 정보 -->
+        <div class="mt-8 text-center text-gray-600 text-sm">
+            <p>버튼을 클릭해서 카운트를 조절하세요!</p>
+        </div>
+    </div>
+
+    <script>
+        // 현재 카운트 값을 저장하는 변수
+        let count = 0;
+
+        // 페이지 로드 시 저장된 카운트 값 불러오기
+        window.addEventListener('load', function() {
+            // 로컬스토리지에서 저장된 카운트 값을 가져옴
+            const savedCount = localStorage.getItem('counterValue');
+
+            // 저장된 값이 있으면 불러오고, 없으면 0으로 시작
+            if (savedCount !== null) {
+                count = parseInt(savedCount);
+                updateDisplay();
+            }
+        });
+
+        // 카운트 증가 함수
+        function increaseCounter() {
+            count++; // 카운트를 1 증가
+            updateDisplay(); // 화면에 표시
+            saveCount(); // 로컬스토리지에 저장
+        }
+
+        // 카운트 감소 함수
+        function decreaseCounter() {
+            // count가 0보다 크면 1 감소 (0 이하로 갈 수 없음)
+            if (count > 0) {
+                count--; // 카운트를 1 감소
+            }
+            updateDisplay(); // 화면에 표시
+            saveCount(); // 로컬스토리지에 저장
+        }
+
+        // 카운트 리셋 함수
+        function resetCounter() {
+            count = 0; // 카운트를 0으로 초기화
+            updateDisplay(); // 화면에 표시
+            saveCount(); // 로컬스토리지에 저장
+        }
+
+        // 화면에 카운트 값을 표시하는 함수
+        function updateDisplay() {
+            // id가 'counter'인 요소를 찾아서 현재 count 값을 표시
+            document.getElementById('counter').textContent = count;
+        }
+
+        // 카운트 값을 로컬스토리지에 저장하는 함수
+        // (새로고침해도 카운트가 사라지지 않도록)
+        function saveCount() {
+            localStorage.setItem('counterValue', count);
+        }
+    </script>
+</body>
+</html>

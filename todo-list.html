@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>간단한 투두 리스트</title>
+    <style>
+        /* 전체 페이지 스타일 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 투두 리스트 컨테이너 */
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+        }
+
+        /* 제목 */
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        /* 입력 필드와 버튼을 담는 영역 */
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* 투두 입력 필드 */
+        #todoInput {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        /* 입력 필드에 포커스되었을 때 */
+        #todoInput:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        /* 추가 버튼 */
+        #addBtn {
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        /* 추가 버튼 호버 효과 */
+        #addBtn:hover {
+            background-color: #45a049;
+        }
+
+        /* 투두 목록 */
+        #todoList {
+            list-style: none;
+        }
+
+        /* 각 투두 항목 */
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+
+        /* 투두 항목 호버 효과 */
+        .todo-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* 완료된 투두 항목의 스타일 */
+        .todo-item.completed {
+            opacity: 0.6;
+        }
+
+        /* 완료된 투두의 텍스트 */
+        .todo-item.completed span {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        /* 체크박스 */
+        .todo-item input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* 투두 텍스트 */
+        .todo-item span {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        /* 삭제 버튼 */
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        /* 삭제 버튼 호버 효과 */
+        .delete-btn:hover {
+            background-color: #da190b;
+        }
+
+        /* 투두가 없을 때 표시 메시지 */
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 투두 리스트</h1>
+
+        <!-- 투두 입력 섹션 -->
+        <div class="input-section">
+            <input
+                type="text"
+                id="todoInput"
+                placeholder="할 일을 입력하세요..."
+                autocomplete="off"
+            >
+            <button id="addBtn">추가</button>
+        </div>
+
+        <!-- 투두 목록 -->
+        <ul id="todoList"></ul>
+
+        <!-- 투두가 없을 때 표시 -->
+        <div class="empty-message">
+            할 일을 추가해보세요! ✨
+        </div>
+    </div>
+
+    <script>
+        // 기본 변수들
+        const todoInput = document.getElementById('todoInput');      // 입력 필드
+        const addBtn = document.getElementById('addBtn');            // 추가 버튼
+        const todoList = document.getElementById('todoList');        // 투두 목록
+        const emptyMessage = document.querySelector('.empty-message'); // 빈 상태 메시지
+
+        // 페이지 로드 시 저장된 투두들을 화면에 표시
+        window.addEventListener('load', loadTodos);
+
+        // 추가 버튼 클릭 시 투두 추가
+        addBtn.addEventListener('click', addTodo);
+
+        // 엔터 키 입력 시 투두 추가
+        todoInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        // 투두 추가 함수
+        function addTodo() {
+            const todoText = todoInput.value.trim(); // 입력값을 가져오고 공백 제거
+
+            // 입력값이 비어있으면 경고 후 함수 종료
+            if (todoText === '') {
+                alert('할 일을 입력해주세요!');
+                return;
+            }
+
+            // 새로운 투두 객체 생성
+            const todo = {
+                id: Date.now(),        // 고유 ID (현재 시간을 숫자로 사용)
+                text: todoText,        // 투두 텍스트
+                completed: false       // 완료 여부
+            };
+
+            // 로컬스토리지에서 기존 투두들을 가져옴
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+            // 새 투두를 목록에 추가
+            todos.push(todo);
+
+            // 로컬스토리지에 저장 (새로고침해도 데이터가 남도록)
+            localStorage.setItem('todos', JSON.stringify(todos));
+
+            // 화면에 투두 표시
+            renderTodo(todo);
+
+            // 입력 필드 비우기
+            todoInput.value = '';
+            todoInput.focus(); // 다시 입력할 수 있도록 포커스 설정
+        }
+
+        // 투두를 화면에 표시하는 함수
+        function renderTodo(todo) {
+            // 새로운 투두 항목 요소 생성
+            const li = document.createElement('li');
+            li.className = 'todo-item';
+            if (todo.completed) {
+                li.classList.add('completed'); // 완료된 경우 'completed' 클래스 추가
+            }
+            li.setAttribute('data-id', todo.id); // 투두의 ID를 속성으로 저장
+
+            // 투두 항목의 HTML 구조 설정
+            li.innerHTML = `
+                <input
+                    type="checkbox"
+                    ${todo.completed ? 'checked' : ''}
+                    onchange="toggleTodo(${todo.id})"
+                >
+                <span>${escapeHtml(todo.text)}</span>
+                <button class="delete-btn" onclick="deleteTodo(${todo.id})">
+                    삭제
+                </button>
+            `;
+
+            // 투두 목록에 항목 추가
+            todoList.appendChild(li);
+
+            // 빈 상태 메시지 숨기기
+            emptyMessage.style.display = 'none';
+        }
+
+        // 모든 저장된 투두들을 불러와 화면에 표시하는 함수
+        function loadTodos() {
+            const todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+            // 저장된 투두가 없으면 빈 상태 메시지 표시
+            if (todos.length === 0) {
+                emptyMessage.style.display = 'block';
+                return;
+            }
+
+            // 각 투두를 화면에 표시
+            todos.forEach(todo => renderTodo(todo));
+        }
+
+        // 투두 완료/미완료 상태 변경 함수
+        function toggleTodo(id) {
+            const todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+            // 해당 ID의 투두를 찾아 completed 상태 반전
+            todos = todos.map(todo =>
+                todo.id === id ? { ...todo, completed: !todo.completed } : todo
+            );
+
+            // 수정된 투두들을 로컬스토리지에 저장
+            localStorage.setItem('todos', JSON.stringify(todos));
+
+            // 화면 새로고침
+            location.reload();
+        }
+
+        // 투두 삭제 함수
+        function deleteTodo(id) {
+            const todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+            // 해당 ID를 제외한 투두들만 남김
+            const updatedTodos = todos.filter(todo => todo.id !== id);
+
+            // 로컬스토리지에 저장
+            localStorage.setItem('todos', JSON.stringify(updatedTodos));
+
+            // 화면에서 해당 투두 항목 제거
+            const todoItem = document.querySelector(`[data-id="${id}"]`);
+            todoItem.remove();
+
+            // 투두가 모두 없으면 빈 상태 메시지 표시
+            if (updatedTodos.length === 0) {
+                emptyMessage.style.display = 'block';
+            }
+        }
+
+        // HTML 특수 문자를 안전하게 표시하는 함수
+        // 악의적인 코드가 실행되는 것을 방지
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
